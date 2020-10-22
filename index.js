@@ -1,19 +1,23 @@
 const store = {
   items: [
-    { id: cuid(), name: 'apples', checked: false },
-    { id: cuid(), name: 'oranges', checked: false },
-    { id: cuid(), name: 'milk', checked: true },
-    { id: cuid(), name: 'bread', checked: false }
+    { id: cuid(), name: 'apples', checked: false, edit: false },
+    { id: cuid(), name: 'oranges', checked: false, edit: false },
+    { id: cuid(), name: 'milk', checked: true, edit: false },
+    { id: cuid(), name: 'bread', checked: false, edit: false }
   ],
   hideCheckedItems: false
 };
 
 const generateItemElement = function (item) {
   let itemTitle = `<span class='shopping-item shopping-item__checked'>${item.name}</span>`;
+
   if (!item.checked) {
     itemTitle = `
      <span class='shopping-item'>${item.name}</span>
     `;
+  }
+  if(item.edit){
+    itemTitle = `<input class='shopping-item' value="${item.name}"/>`;
   }
 
   return `
@@ -25,6 +29,9 @@ const generateItemElement = function (item) {
         </button>
         <button class='shopping-item-delete js-item-delete'>
           <span class='button-label'>delete</span>
+        </button>
+        <button class='shopping-item-edit js-item-edit'>
+          <span class='button-label'>edit</span>
         </button>
       </div>
     </li>`;
@@ -145,6 +152,37 @@ const handleToggleFilterClick = function () {
   });
 };
 
+// EDITS FOR THE EDITED DRILL BELOW 
+
+const editItemtoShoppingList = function(id){
+  let items = [...store.items];
+  editItem = items.find(x => x.id === id);
+  editItem.edit = true;
+  console.log(editItem);
+  let newItems = items.filter(x => x.id != id);
+  store.items = newItems;
+  store.items.push(editItem);
+}
+
+
+const handleEditItemSubmit = function (){
+  $('.shopping-item-edit.js-item-edit').on('click', function(evt){
+    evt.preventDefault();
+    let id = $(this).closest('li').attr('data-item-id');
+    editItemtoShoppingList(id);
+    render();
+  })
+}
+
+
+// Do I want to toggle between original item and new edited item?
+const toggleEditedListItem = function (edit) {
+  const foundItem = store.items.find(item => item.edit === edit);
+  foundItem.checked = !foundItem.checked;
+};
+
+
+
 /**
  * This function will be our callback when the
  * page loads. It is responsible for initially 
@@ -160,6 +198,7 @@ const handleShoppingList = function () {
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleToggleFilterClick();
+  handleEditItemSubmit();
 };
 
 // when the page loads, call `handleShoppingList`
